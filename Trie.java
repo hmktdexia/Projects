@@ -18,12 +18,28 @@ public class Trie {
 	
 	      public TrieNode(){
 		      edges = new TrieNode[26];
-		    }
+	      }
+	      public TrieNode(char ch){
+	            val = ch;
+	            edges = new TrieNode[26];
+	      }
+	      String search(String word){
+	            TrieNode root = this;
+	            char ch;
+	            for(int i=0;i<word.length();i++){
+	                ch=word.charAt(i);
+	                if(root.word != null
+	                    || root.edges[ch-'a'] == null)
+	                    break;
+	                root = root.edges[ch-'a'];
+	            }
+	            return root.word;
+	        }
 	
 	      public String getWord(){
 		        return word;
 	      }
-		}
+    }
     private TrieNode root;
     
     public Trie() {
@@ -74,6 +90,56 @@ public class Trie {
     int index(char a){
     	return a -'a'; 
     }
+    /**
+     * This replaceWords is an algorithm example to use Trie.
+     *     replace word in sentence with prefix in dictionary
+     *   	Input: dict = ["cat", "bat", "rat"]
+     *		sentence = "the cattle was rattled by the battery"
+     *         Output: "the cat was rat by the bat"
+     **/
+    public String replaceWords(List<String> dict, String sentence) {
+	        
+	        if(dict == null || dict.size()==0)
+	            return sentence;
+	        
+	        TrieNode trie = new TrieNode();
+	        TrieNode root;
+	        char ch;
+	        for(String w : dict){
+	            root = trie;
+	            for(int i=0;i<w.length();i++){
+	                ch=w.charAt(i);
+	                if(root.edges[ch-'a'] == null){
+	                    root.edges[ch-'a'] = new TrieNode(ch);
+	                }
+	                root = root.edges[ch-'a'];
+	            }
+	            root.word=w;
+	        }
+	        String[] words = sentence.split(" ");
+	        
+	        Map<String,String> map = new HashMap<String, String>();
+	        String w;
+	        for(int i=0;i<words.length;i++){
+	            root = trie;
+	            if(map.containsKey(words[i])){
+	                w = map.get(words[i]);
+	                words[i]=w;
+	            }else{
+	                w = root.search(words[i]);
+	                if(w != null){
+	                    map.put(words[i], w);
+	                    words[i]=w;
+	                } 
+	            }
+	        }
+	        StringBuilder builder = new StringBuilder();
+	        for(String word : words){
+	            builder.append(word+" ");
+	        }
+	        
+	        return builder.toString().trim();
+	    }
     
     public static void main(String[] args){
     	
@@ -81,5 +147,11 @@ public class Trie {
     	
     	trie.insert("a");
     	System.out.println(trie.search("a"));
+	    
+	String sentence="the cattle was rattled by the battery";
+	String[] words={"cat", "bat", "rat"};
+	List<String> dict = Arrays.asList(words);
+	new Trie().replaceWords(dict, sentence);
+	System.out.println(sentence);
     }
 }
